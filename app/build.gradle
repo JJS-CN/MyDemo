@@ -120,7 +120,7 @@ android {
  * 360加固 + 多渠道打包
  */
     task assembleRelease360jiagu(dependsOn: 'assembleRelease') {
-        group '360reinforce'
+        //group '360reinforce'
 //    dependsOn("assembleRelease")
 
         doLast {
