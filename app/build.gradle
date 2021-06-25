@@ -120,16 +120,19 @@ android {
  * 360加固 + 多渠道打包
  */
     task assembleRelease360jiagu(dependsOn: 'assembleRelease') {
-        //group '360reinforce'
+        group '360reinforce'
 //    dependsOn("assembleRelease")
 
         doLast {
             //assembleRelease打包完成后，doLast才执行， 360加固多渠道
             APK_ABINAMES.each { key, value ->
 
-                    //因为需要打3个包，所以这里需要调用3次，但是网络带宽等因素，可能需要顺序加载？？
-                    //v7a
-                    reinforceApk(value.get(0))
+                //因为需要打3个包，所以这里需要调用3次，但是网络带宽等因素，可能需要顺序加载？？
+                //v7a
+                try {
+                    reinforceApk(value.get(0), value.get(1))
+                } catch (Exception e) {
+                }
 
             }
 
@@ -172,11 +175,9 @@ def execute360JiaguCmd(cmd) {
 /**
  * 加固 + 多渠道
  */
-def reinforceApk(a) {
-    def inapkPath = a
-    println "--- 360 reinforceApk start! ---  ${inapkPath}_ "+ "E".startsWith()
+def reinforceApk(inapkPath, jiaguConfig) {
+    println "--- 360 reinforceApk start! ---  ${inapkPath}_ "
 
-    def jiaguConfig = inapkValues.getAt(1)
     println "reinforce apk: ${inapkPath}"
 
     exec {
@@ -207,6 +208,6 @@ def reinforceApk(a) {
             println "reinforce 开始加固、多渠道打包:" + inapkPath
             // 加固apk 多渠道
             //commandLine "cmd", "/c", "java -jar ${REINFORCE_JAR} -jiagu ${inapkPath} ${OUT_APK_PATH} -autosign -automulpkg"
-            //execute360JiaguCmd("java -jar ${REINFORCE_JAR} -jiagu ${inapkPath} ${OUT_APK_PATH} -autosign -automulpkg")
+            execute360JiaguCmd("java -jar ${REINFORCE_JAR} -jiagu ${inapkPath} ${OUT_APK_PATH} -autosign -automulpkg")
     }
 }
