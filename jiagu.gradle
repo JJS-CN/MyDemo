@@ -1,0 +1,32 @@
+ext {
+
+    /加固/
+    FIRST_JIAGU = false //  首次加固
+
+    JIAGU_ROOT = "${project.rootDir}/360jiagu"
+
+    REINFORCE_JAR = "${JIAGU_ROOT}/jiagu/jiagu.jar" // 360加固助手炸药包
+
+    REINFORCE_NAME = "994462623@qq.com" //360加固账号
+
+    REINFORCE_PASSWORD = "abc123" //360加固密码
+
+    KEY_PATH = "${project.rootDir}/app/keystore.jks" //密钥路径
+
+    KEY_PASSWORD = "123456" //密钥密码
+
+    ALIAS = "key0" //密钥别名
+
+    ALIAS_PASSWORD = "123456" //别名密码
+
+    WALLE_CHANNELS_CONFIG = "${JIAGU_ROOT}/jiagu/channels"//渠道配置文件
+
+    IN_APK_PATH = "${project.buildDir}/outputs/apk/release/"// 需要加固的apk的输入路径
+
+    OUT_APK_PATH = "${JIAGU_ROOT}/release"// 加固后多渠道apk输出路径
+
+    CHANNEL_APKS_PATH = "${project.buildDir}/outputs/"//渠道Apk输出路径
+
+    APK_ABINAMES = ["armeabi-v7a", 'arm64-v8a', "all"]
+
+}

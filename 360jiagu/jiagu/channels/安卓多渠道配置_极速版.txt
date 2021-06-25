@@ -1,0 +1,12 @@
+﻿UMENG_CHANNEL 360应用平台 360
+UMENG_CHANNEL 应用宝 tencent
+UMENG_CHANNEL 魅族商店 meizu
+UMENG_CHANNEL qudao8 qudao8
+UMENG_CHANNEL qudao12 qudao12
+UMENG_CHANNEL oppo oppo
+UMENG_CHANNEL 华为 huawei
+UMENG_CHANNEL 三星6 qudao6
+UMENG_CHANNEL 百度手机助手 baidu
+UMENG_CHANNEL 豌豆荚 wandoujia
+UMENG_CHANNEL 小米 xiaomi
+UMENG_CHANNEL vivo vivo

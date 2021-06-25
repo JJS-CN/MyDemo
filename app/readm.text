@@ -1,0 +1,68 @@
+private List<View> childs;
+    private int selectIndex = 0;
+
+    public SwitchGroupView(Context context) {
+    super(context);
+    }
+
+    public SwitchGroupView(Context context, @Nullable AttributeSet attrs) {
+    super(context, attrs);
+    }
+
+    public SwitchGroupView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    super(context, attrs, defStyleAttr);
+    }
+
+    public SwitchGroupView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+    super.onFinishInflate();
+    childs = new ArrayList<>();
+        for (int i = 0; i < getChildCount(); i++) {
+        childs.add(getChildAt(i));
+        }
+
+        initEvent();
+        }
+
+        private void initEvent() {
+        if (!childs.isEmpty()) {
+        select(selectIndex, true);
+        }
+
+        for (int i = 0; i < childs.size(); i++) {
+        childs.get(i).setOnClickListener(this);
+        }
+        }
+
+
+        @Override
+        public void onClick(View v) {
+        int i = childs.indexOf(v);
+
+        if (i == selectIndex) {
+        return;
+        }
+        select(selectIndex, false);
+        selectIndex = childs.indexOf(v);
+        select(selectIndex, true);
+
+        }
+
+        private void select(int index, boolean isSelect) {
+        View view = childs.get(index);
+        view.setSelected(isSelect);
+        if (view instanceof ViewGroup) {
+        ViewGroup vg = (ViewGroup) view;
+        for (int i = 0; i < vg.getChildCount(); i++) {
+        vg.getChildAt(i).setSelected(isSelect);
+        }
+        }
+        }
+
+        private void unSelect(int index) {
+
+        }

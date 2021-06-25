@@ -1,0 +1,212 @@
+apply plugin: 'com.android.application'
+ext.myStoreFile = file("keystore.jks")
+ext.myStorePassword = '123456'
+ext.myKeyAlias = 'key0'
+ext.myKeyPassword = '123456'
+ext {
+
+    /加固/
+    FIRST_JIAGU = false //  首次加固
+
+    JIAGU_ROOT = "${project.rootDir}/360jiagu"
+
+    REINFORCE_JAR = "${JIAGU_ROOT}/jiagu/jiagu.jar" // 360加固助手炸药包
+
+    REINFORCE_NAME = "994462623@qq.com" //360加固账号
+
+    REINFORCE_PASSWORD = "abc123" //360加固密码
+
+    KEY_PATH = "${project.rootDir}/app/keystore.jks" //密钥路径
+
+    KEY_PASSWORD = "123456" //密钥密码
+
+    ALIAS = "key0" //密钥别名
+
+    ALIAS_PASSWORD = "123456" //别名密码
+
+    WALLE_CHANNELS_CONFIG = "${JIAGU_ROOT}/jiagu/channels"//渠道配置文件
+
+    IN_APK_PATH = "${project.buildDir}/outputs/apk/release/"// 需要加固的apk的输入路径
+
+    OUT_APK_PATH = "${JIAGU_ROOT}/release"// 加固后多渠道apk输出路径
+
+    CHANNEL_APKS_PATH = "${project.buildDir}/outputs/"//渠道Apk输出路径
+
+    APK_ABINAMES = ["armeabi-v7a": ["", ""], 'arm64-v8a': ["", ""], "all": ["", ""]]
+
+}
+android {
+    compileSdkVersion 29
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.example.myapplication"
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    signingConfigs {
+        config {
+            keyAlias myKeyAlias
+            keyPassword myKeyPassword
+            storeFile myStoreFile
+            storePassword myStorePassword
+
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    splits {
+        abi {
+            // 是否开启
+            enable true
+
+            // 重置包含的目录，因为已经是包含全部
+            reset()
+            // 设置包含，调用前需要先用 reset 将默认清除
+            include 'armeabi-v7a', 'arm64-v8a'
+            // 是否打出包含全部的apk
+            universalApk true
+        }
+    }
+    buildTypes {
+        debug {
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+
+            shrinkResources false
+            signingConfig signingConfigs.config
+        }
+        release {
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            shrinkResources false
+            signingConfig signingConfigs.config
+            applicationVariants.all { variant ->
+
+                variant.outputs.all { output ->
+                    if (variant.buildType.name.equals('release')) {
+                        def abiname = output.getFilter(com.android.build.OutputFile.ABI)
+                        if (abiname == null) {
+                            abiname = "all"
+                        }
+                        checkReleaseBuilds
+                        def fileName = "${variant.versionName}_${variant.versionCode}_${abiname}.apk"
+                        outputFileName = fileName
+                        println "outputFile:" + outputFile
+                        println "outputFileStart:" + APK_ABINAMES[abiname]
+
+                        if (APK_ABINAMES[abiname] != null) {
+                            APK_ABINAMES[abiname] = [outputFile, "${abiname}"]
+                        }
+                        println "outputFileEnd:" + APK_ABINAMES[abiname]
+                    }
+                }
+            }
+        }
+    }
+
+    task cleanOutputsDir {
+        println "delete outputsPath=" + CHANNEL_APKS_PATH
+        new File(CHANNEL_APKS_PATH).deleteDir()
+        //new File(CHANNEL_APKS_PATH).mkdirs()
+    }
+/**
+ * 360加固 + 多渠道打包
+ */
+    task assembleRelease360jiagu(dependsOn: 'assembleRelease') {
+        group '360reinforce'
+//    dependsOn("assembleRelease")
+
+        doLast {
+            //assembleRelease打包完成后，doLast才执行， 360加固多渠道
+            APK_ABINAMES.each { key, value ->
+
+                    //因为需要打3个包，所以这里需要调用3次，但是网络带宽等因素，可能需要顺序加载？？
+                    //v7a
+                    reinforceApk(value.get(0))
+
+            }
+
+
+        }
+    }
+}
+
+
+tasks.whenTaskAdded { theTask ->
+    if (theTask.name.equals("assembleRelease")) {
+        theTask.dependsOn "cleanOutputsDir"
+    }
+}
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    api 'com.blankj:utilcode:1.26.0'
+    api 'androidx.recyclerview:recyclerview:1.0.0'
+    api 'androidx.cardview:cardview:1.0.0'
+    api 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.50'
+}
+
+def execute360JiaguCmd(cmd) {
+
+    def p = cmd.execute(null, new File(JIAGU_ROOT, "\\jiagu\\java\\bin"))
+    println p.text
+    p.waitFor()  // 用以等待外部进程调用结束
+    println p.exitValue()
+}
+
+
+/**
+ * 加固 + 多渠道
+ */
+def reinforceApk(a) {
+    def inapkPath = a
+    println "--- 360 reinforceApk start! ---  ${inapkPath}_ "+ "E".startsWith()
+
+    def jiaguConfig = inapkValues.getAt(1)
+    println "reinforce apk: ${inapkPath}"
+
+    exec {
+        ExecSpec execSpec ->
+            println "reinforce apk login by : ${REINFORCE_NAME}"
+            // 登录
+            //commandLine "cmd", "/c", "java -jar ${REINFORCE_JAR} -login ${REINFORCE_NAME} ${REINFORCE_PASSWORD}"
+            execute360JiaguCmd("java -jar ${REINFORCE_JAR} -login ${REINFORCE_NAME} ${REINFORCE_PASSWORD}")
+            // 需要先上传sign文件、渠道文件
+
+            println "reinforce import sign file : ${KEY_PATH}"
+            //sign 文件
+            //commandLine "cmd", "/c", "java -jar ${REINFORCE_JAR} -importsign ${KEY_PATH} ${KEY_PASSWORD}" + " ${ALIAS} ${ALIAS_PASSWORD}"
+            execute360JiaguCmd("java -jar ${REINFORCE_JAR} -importsign ${KEY_PATH} ${KEY_PASSWORD}" + " ${ALIAS} ${ALIAS_PASSWORD}")
+
+            def channelsConfig = WALLE_CHANNELS_CONFIG + "/" + jiaguConfig + ".txt"
+            println "reinforce import channels file : ${channelsConfig}"
+            // 渠道文件
+            //commandLine "cmd", "/c", "java -jar ${REINFORCE_JAR} -importmulpkg ${WALLE_CHANNELS_CONFIG}"
+            execute360JiaguCmd("java -jar ${REINFORCE_JAR} -deletemulpkg")
+            execute360JiaguCmd("java -jar ${REINFORCE_JAR} -importmulpkg ${channelsConfig}")
+            execute360JiaguCmd("java -jar ${REINFORCE_JAR} -showmulpkg")
+
+            // 签名信息
+            //commandLine "cmd", "/c", "java -jar ${REINFORCE_JAR} -showsign"
+            execute360JiaguCmd("java -jar ${REINFORCE_JAR} -showsign")
+
+            println "reinforce 开始加固、多渠道打包:" + inapkPath
+            // 加固apk 多渠道
+            //commandLine "cmd", "/c", "java -jar ${REINFORCE_JAR} -jiagu ${inapkPath} ${OUT_APK_PATH} -autosign -automulpkg"
+            //execute360JiaguCmd("java -jar ${REINFORCE_JAR} -jiagu ${inapkPath} ${OUT_APK_PATH} -autosign -automulpkg")
+    }
+}
