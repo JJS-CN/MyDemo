@@ -132,6 +132,8 @@ android {
                 try {
                     reinforceApk(value.get(0), value.get(1))
                 } catch (Exception e) {
+                    println "reinforceApk exception"
+                    println e.getMessage().toString()
                 }
 
             }
