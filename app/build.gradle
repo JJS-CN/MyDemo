@@ -166,8 +166,9 @@ dependencies {
 }
 
 def execute360JiaguCmd(cmd) {
-
-    def p = cmd.execute(null, new File(JIAGU_ROOT, "\\jiagu\\java\\bin"))
+    println "reinforce cmd: ${cmd}"
+    println "reinforce cmd exists: ${new File(JIAGU_ROOT, "jiagu/java/bin").exists()}"
+    def p = cmd.execute(null, new File(JIAGU_ROOT, "jiagu/java/bin"))
     println p.text
     p.waitFor()  // 用以等待外部进程调用结束
     println p.exitValue()
@@ -178,7 +179,7 @@ def execute360JiaguCmd(cmd) {
  * 加固 + 多渠道
  */
 def reinforceApk(inapkPath, jiaguConfig) {
-    println "--- 360 reinforceApk start! ---  ${inapkPath}_ "
+    println "--- 360 reinforceApk start! ---  ${inapkPath} "
 
     println "reinforce apk: ${inapkPath}"
 
