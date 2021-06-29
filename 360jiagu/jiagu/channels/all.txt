@@ -1,1 +1,2 @@
 ﻿UMENG_CHANNEL 魅族商店 meizu
+UMENG_CHANNEL 华为商店 huawei

@@ -185,6 +185,14 @@ def reinforceApk(inapkPath, jiaguConfig) {
 
     exec {
         ExecSpec execSpec ->
+            try {
+                println "reinforce Linux start"
+                def apkPath = new File(inapkPath)
+                println "reinforce Linux start file:" + apkPath.exists()
+                commandLine "sh", "../360jiagu/jiagu/jiagu.sh", apkPath, apkPath.getParent()
+            } catch (Exception e) {
+                println "reinforce Linux error: ${e.getMessage().toString()}"
+            }
             println "reinforce apk login by : ${REINFORCE_NAME}"
             // 登录
             //commandLine "cmd", "/c", "java -jar ${REINFORCE_JAR} -login ${REINFORCE_NAME} ${REINFORCE_PASSWORD}"
