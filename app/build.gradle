@@ -28,7 +28,7 @@ ext {
 
     IN_APK_PATH = "${project.buildDir}/outputs/apk/release/"// 需要加固的apk的输入路径
 
-    OUT_APK_PATH = "${JIAGU_ROOT}/release"// 加固后多渠道apk输出路径
+    OUT_APK_PATH = "${project.buildDir}/outputs/jiagu"// 加固后多渠道apk输出路径
 
     CHANNEL_APKS_PATH = "${project.buildDir}/outputs/"//渠道Apk输出路径
 
@@ -217,6 +217,10 @@ def reinforceApk(inapkPath, jiaguConfig) {
             execute360JiaguCmd("java -jar ${REINFORCE_JAR} -showsign")
 
             println "reinforce 开始加固、多渠道打包:" + inapkPath
+            def outFile = new File(OUT_APK_PATH)
+            if (!outFile.exists()) {
+                outFile.mkdirs()
+            }
             // 加固apk 多渠道
             //commandLine "cmd", "/c", "java -jar ${REINFORCE_JAR} -jiagu ${inapkPath} ${OUT_APK_PATH} -autosign -automulpkg"
             execute360JiaguCmd("java -jar ${REINFORCE_JAR} -jiagu ${inapkPath} ${OUT_APK_PATH} -autosign -automulpkg")
